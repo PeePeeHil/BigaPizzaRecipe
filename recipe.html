@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light}body{margin:0}[hidden]{display:none!important}</style>
+<title>Biga 60:40</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=DM+Mono:wght@400;500&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+/* Układ: arkusz formuły piekarza. Nagłówek, po lewej kalkulator, po prawej harmonogram, niżej kroki i notatki. Mocny akcent tylko w liczbach i w godzinie wypieku. */
+:root {
+  --bg: #FAF2E3;
+  --surface: #FFFCF6;
+  --ink: #3A2A1E;
+  --muted: #7A6652;
+  --line: #E8DAC0;
+  --brand: #5A3A22;
+  --accent: #9A5B2B;
+  --sand: #C8A97E;
+  --on-accent: #FFFBF5;
+  --warn-bg: #F1E1C8;
+  --warn-ink: #5E3A17;
+  --f-display: 'Bricolage Grotesque', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
+  --f-body: 'Instrument Sans', 'Segoe UI', system-ui, sans-serif;
+  --f-mono: 'DM Mono', ui-monospace, Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 16px/1.55 var(--f-body);
+  padding-block: 8px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.page { max-width: 1120px; margin: 0 auto; display: grid; gap: 48px; padding-top: 20px; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; line-height: 1.05; }
+h1 { font-size: clamp(3.2rem, 11vw, 6rem); font-weight: 800; letter-spacing: -0.035em; color: var(--brand); }
+h2 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 16px; }
+h3 { font-size: 1.05rem; font-weight: 700; }
+p { margin: 0; }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.kicker { font: 500 12px/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 28px 0 14px; }
+.lede { max-width: 58ch; color: var(--muted); margin-top: 16px; font-size: 1.0625rem; }
+
+.cols { display: grid; gap: 48px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 920px) {
+  .cols { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: start; gap: 56px; }
+}
+
+/* Kalkulator */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.chip {
+  border: 1px solid var(--line); background: var(--bg); border-radius: 999px; padding: 7px 14px;
+  font: 500 13px/1.2 var(--f-mono); cursor: pointer;
+}
+.chip[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: var(--surface); }
+.controls { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 14px; }
+.field { display: grid; gap: 6px; min-width: 0; }
+.field > span { font: 500 11px/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.field input {
+  width: 100%; height: 46px; min-width: 0; border: 1px solid var(--line); background: var(--bg); border-radius: 8px;
+  padding: 0 12px; font: 700 1.25rem/1 var(--f-display);
+}
+.stepper { display: flex; }
+.stepper input { text-align: center; border-radius: 0; border-left: 0; border-right: 0; }
+.stepper button {
+  width: 46px; height: 46px; flex: none; border: 1px solid var(--line); background: var(--bg);
+  font: 700 1.25rem/1 var(--f-display); cursor: pointer;
+}
+.stepper button:first-child { border-radius: 8px 0 0 8px; }
+.stepper button:last-child { border-radius: 0 8px 8px 0; }
+
+.stages { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 28px; margin-top: 26px; }
+.stage h3 { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; border-bottom: 2px solid var(--ink); padding-bottom: 8px; }
+.stage h3 span { font: 500 12px/1 var(--f-mono); color: var(--muted); }
+.stage dl { margin: 0; }
+.row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line); }
+.row dt { color: var(--muted); font-size: 0.95rem; min-width: 0; }
+.row dd { margin: 0; font: 800 1.9rem/1 var(--f-display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.row dd small { font: 500 0.8rem/1 var(--f-mono); color: var(--muted); margin-left: 4px; letter-spacing: 0; }
+
+.split { display: flex; height: 10px; border-radius: 5px; overflow: hidden; margin: 26px 0 8px; }
+.split i { display: block; }
+.split i:first-child { background: var(--brand); }
+.split i:last-child { background: var(--sand); }
+.split-l { display: flex; justify-content: space-between; gap: 12px; font: 500 12px/1.3 var(--f-mono); color: var(--muted); }
+
+.totals { display: grid; grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); gap: 14px 18px; margin: 22px 0 0; }
+.totals div { border-top: 1px solid var(--line); padding-top: 8px; min-width: 0; }
+.totals dt { font: 500 11px/1.2 var(--f-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.totals dd { margin: 4px 0 0; font: 500 1rem/1.3 var(--f-mono); font-variant-numeric: tabular-nums; }
+.pct { margin-top: 16px; color: var(--muted); font-size: 0.9rem; max-width: 62ch; }
+.warn { background: var(--warn-bg); color: var(--warn-ink); padding: 10px 12px; border-radius: 8px; font-size: 0.9rem; margin-top: 12px; }
+.tools { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; align-items: center; }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 9px 14px; font-weight: 600; font-size: 0.9rem; cursor: pointer; }
+.btn:hover { border-color: var(--muted); }
+.copybox { width: 100%; min-height: 110px; margin-top: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); padding: 10px; font: 400 13px/1.5 var(--f-mono); color: var(--ink); }
+
+/* Harmonogram */
+.when-field { display: grid; gap: 6px; max-width: 280px; margin-bottom: 20px; }
+.when-field > span { font: 500 11px/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.when-field input { height: 46px; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 0 12px; font: 500 1rem/1 var(--f-mono); width: 100%; min-width: 0; }
+.day { font: 500 12px/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin: 18px 0 12px; }
+.day:first-of-type { margin-top: 0; }
+.timeline { list-style: none; margin: 0 0 0 6px; padding: 0; }
+.timeline li { position: relative; padding: 0 0 22px 26px; border-left: 2px solid var(--line); }
+.timeline li:last-child { border-left-color: transparent; padding-bottom: 4px; }
+.timeline li::before { content: ""; position: absolute; left: -8px; top: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--bg); border: 3px solid var(--brand); }
+.timeline li.bake::before { background: var(--accent); border-color: var(--accent); }
+.timeline time { display: block; font: 500 1.35rem/1 var(--f-mono); font-variant-numeric: tabular-nums; }
+.timeline li.bake time { color: var(--accent); }
+.timeline strong { display: block; margin-top: 6px; font-weight: 600; }
+.timeline .d { display: block; color: var(--muted); font-size: 0.92rem; max-width: 44ch; }
+
+/* Kroki */
+.phase { margin-top: 28px; }
+.phase:first-of-type { margin-top: 0; }
+.phase h3 { font-size: 1.15rem; margin-bottom: 4px; }
+.steps { list-style: none; margin: 0; padding: 0; max-width: 78ch; }
+.steps li { border-top: 1px solid var(--line); }
+.steps li:last-child { border-bottom: 1px solid var(--line); }
+.step { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 12px; padding: 14px 0; cursor: pointer; }
+.step input { width: 22px; height: 22px; margin: 2px 0 0; accent-color: var(--accent); }
+.step .when { display: block; font: 500 12px/1 var(--f-mono); color: var(--accent); margin-bottom: 6px; letter-spacing: 0.04em; }
+.step b { font-weight: 700; font-variant-numeric: tabular-nums; }
+.step input:checked ~ .txt { opacity: 0.5; }
+
+.notes { max-width: 72ch; margin: 0; padding-left: 1.1rem; display: grid; gap: 10px; }
+.notes li::marker { color: var(--accent); }
+
+.hint { color: var(--muted); font-size: 0.9rem; margin: -8px 0 18px; max-width: 62ch; }
+.timer { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: -6px 0 16px 38px; }
+.t-read { font: 500 1.6rem/1 var(--f-mono); font-variant-numeric: tabular-nums; min-width: 6.2ch; }
+.timer.run .t-read, .timer.fin .t-read { color: var(--accent); }
+.tb { height: 38px; min-width: 38px; padding: 0 12px; border: 1px solid var(--line); background: var(--surface); border-radius: 8px; font: 600 0.9rem/1 var(--f-body); cursor: pointer; }
+.tb:hover { border-color: var(--muted); }
+.tb.go { background: var(--accent); border-color: var(--accent); color: var(--on-accent); min-width: 78px; }
+.timer.fin .tb.go { background: var(--brand); border-color: var(--brand); color: var(--surface); }
+.timer.fin { padding: 6px 10px; margin-left: 28px; background: var(--warn-bg); border-radius: 8px; }
+</style>
+
+</head>
+<body>
+<div class="page">
+  <div class="cols">
+    <section aria-labelledby="h-calc">
+      <h2 id="h-calc">Ilości</h2>
+      <div class="panel">
+        <div class="controls">
+          <div class="field">
+            <span>Liczba kul</span>
+            <div class="stepper">
+              <button type="button" id="n-minus" aria-label="Mniej kul">−</button>
+              <input id="n" type="number" inputmode="numeric" min="1" max="60" value="6" aria-label="Liczba kul">
+              <button type="button" id="n-plus" aria-label="Więcej kul">+</button>
+            </div>
+          </div>
+          <label class="field"><span>Waga kuli, g</span><input id="w" type="number" inputmode="numeric" min="40" max="600" step="5" value="280"></label>
+          <label class="field"><span>Hydracja, %</span><input id="h" type="number" inputmode="decimal" min="55" max="75" step="1" value="65"></label>
+        </div>
+        <div id="notices"></div>
+        <div class="stages" id="stages"></div>
+        <div class="split" id="split" aria-hidden="true"></div>
+        <div class="split-l" id="split-l"></div>
+        <dl class="totals" id="totals"></dl>
+        <div class="tools">
+          <button type="button" class="btn" id="copy">Kopiuj składniki</button>
+          <span id="copy-msg" role="status"></span>
+        </div>
+        <textarea class="copybox" id="copybox" readonly hidden aria-label="Lista składników"></textarea>
+      </div>
+    </section>
+
+    <section aria-labelledby="h-plan">
+      <h2 id="h-plan">Harmonogram</h2>
+      <label class="when-field">
+        <span>Pierwsza pizza z pieca</span>
+        <input id="bake" type="datetime-local">
+      </label>
+      <div id="plan"></div>
+      <div class="tools"><button type="button" class="btn" id="ics">Dodaj alarmy do kalendarza</button><span id="ics-msg" role="status"></span></div>
+      <p class="hint" style="margin:10px 0 0">Plik .ics ustawia alarm na każdy etap harmonogramu. Pobieranie działa w pliku HTML otwartym w przeglądarce telefonu. W podglądzie na claude.ai jest zablokowane.</p>
+    </section>
+  </div>
+
+  <section aria-labelledby="h-steps">
+    <h2 id="h-steps">Kroki</h2>
+    <p class="hint">Timer liczy do zapisanej godziny końca, więc po powrocie na stronę pokaże dokładny czas. Dźwięk odezwie się tylko przy otwartej stronie.</p>
+    <div id="steps"></div>
+    <div class="tools"><button type="button" class="btn" id="reset">Wyczyść odhaczone</button></div>
+  </section>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var KEY = 'biga-60-40', DONE = 'biga-60-40-done';
+  var $ = function (id) { return document.getElementById(id); };
+
+  var nfs = {};
+  function fmt(x, d) {
+    d = d || 0;
+    nfs[d] = nfs[d] || new Intl.NumberFormat('pl-PL', { maximumFractionDigits: d });
+    var p = Math.pow(10, d);
+    return nfs[d].format(Math.round(x * p) / p);
+  }
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function toInput(d) {
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+  function nextSaturday() {
+    var d = new Date();
+    d.setDate(d.getDate() + ((6 - d.getDay() + 7) % 7));
+    d.setHours(18, 0, 0, 0);
+    if (d <= new Date()) d.setDate(d.getDate() + 7);
+    return d;
+  }
+
+  var state = { n: 6, w: 280, h: 65, bake: toInput(nextSaturday()) };
+  var done = {};
+  try {
+    var s = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (s) {
+      if (+s.n > 0) state.n = +s.n;
+      if (+s.w > 0) state.w = +s.w;
+      if (+s.h > 0) state.h = +s.h;
+      if (s.bake && new Date(s.bake) > new Date()) state.bake = s.bake;
+    }
+    done = JSON.parse(localStorage.getItem(DONE) || '{}') || {};
+  } catch (e) { done = {}; }
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); localStorage.setItem(DONE, JSON.stringify(done)); localStorage.setItem(TKEY, JSON.stringify(timers)); } catch (e) {}
+  }
+
+  // Timery kroków. Zapisujemy godzinę końca, więc stan przeżywa odświeżenie strony.
+  var TKEY = 'biga-60-40-timers';
+  var timers = {};
+  try { timers = JSON.parse(localStorage.getItem(TKEY) || '{}') || {}; } catch (e) { timers = {}; }
+  var beeped = {}, actx = null, wake = null, wantWake = false;
+  Object.keys(timers).forEach(function (id) { if (timers[id].end && timers[id].end <= Date.now()) beeped[id] = true; });
+
+  function fmtT(sec) {
+    var h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
+    return (h ? h + ':' + pad(m) : pad(m)) + ':' + pad(s);
+  }
+  function initAudio() {
+    try {
+      if (!actx) { var AC = window.AudioContext || window.webkitAudioContext; if (AC) actx = new AC(); }
+      if (actx && actx.state === 'suspended') actx.resume();
+    } catch (e) {}
+  }
+  function beep() {
+    try {
+      if (actx) {
+        for (var i = 0; i < 3; i++) {
+          var o = actx.createOscillator(), g = actx.createGain(), t0 = actx.currentTime + i * 0.45;
+          o.frequency.value = 880; o.connect(g); g.connect(actx.destination);
+          g.gain.setValueAtTime(0.0001, t0);
+          g.gain.exponentialRampToValueAtTime(0.4, t0 + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.3);
+          o.start(t0); o.stop(t0 + 0.32);
+        }
+      }
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    } catch (e) {}
+  }
+  function wakeSync(on) {
+    wantWake = on;
+    try {
+      if (on && !wake && navigator.wakeLock && !document.hidden) {
+        wake = 1;
+        navigator.wakeLock.request('screen').then(function (l) {
+          if (!wantWake) { l.release(); wake = null; return; }
+          wake = l; l.addEventListener('release', function () { wake = null; });
+        }, function () { wake = null; });
+      } else if (!on && wake && wake.release) { wake.release(); wake = null; }
+    } catch (e) { wake = null; }
+  }
+  function timerHTML(it) {
+    if (!it.tm) return '';
+    var tr = timers[it.id] || {};
+    var dur = tr.dur != null ? tr.dur : it.tm[0];
+    return '<div class="timer" data-id="' + it.id + '" data-def="' + it.tm[0] + '" data-step="' + it.tm[1] + '">' +
+      '<span class="t-read">' + fmtT(dur) + '</span>' +
+      '<button type="button" class="tb" data-act="minus" aria-label="Krócej">−</button>' +
+      '<button type="button" class="tb" data-act="plus" aria-label="Dłużej">+</button>' +
+      '<button type="button" class="tb go" data-act="go">Start</button></div>';
+  }
+  function paintTimers() {
+    var now = Date.now(), soon = null, near = false;
+    var els = document.querySelectorAll('.timer');
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i], id = el.dataset.id, tr = timers[id] || {};
+      var dur = tr.dur != null ? tr.dur : +el.dataset.def;
+      var rd = el.querySelector('.t-read'), go = el.querySelector('.go');
+      var cls = 'timer', txt = fmtT(dur), btn = 'Start';
+      if (tr.end) {
+        var left = Math.ceil((tr.end - now) / 1000);
+        if (left > 0) {
+          cls += ' run'; txt = fmtT(left); btn = 'Stop';
+          if (soon === null || left < soon) soon = left;
+          if (left <= 7200) near = true;
+        } else {
+          cls += ' fin'; txt = 'Gotowe'; btn = 'Zeruj';
+          if (!beeped[id]) { beeped[id] = true; beep(); }
+        }
+      }
+      if (el.className !== cls) el.className = cls;
+      if (rd.textContent !== txt) rd.textContent = txt;
+      if (go.textContent !== btn) go.textContent = btn;
+    }
+    document.title = soon !== null ? fmtT(soon) + ' · Biga 60:40' : 'Biga 60:40';
+    wakeSync(near);
+  }
+  function timerAct(b) {
+    var el = b.closest('.timer'), id = el.dataset.id, step = +el.dataset.step, def = +el.dataset.def;
+    var tr = timers[id] || (timers[id] = {});
+    var dur = tr.dur != null ? tr.dur : def, act = b.dataset.act, now = Date.now();
+    if (act === 'go') {
+      if (tr.end) { delete tr.end; delete beeped[id]; }
+      else { initAudio(); tr.end = now + dur * 1000; beeped[id] = false; }
+    } else {
+      if (tr.end && tr.end <= now) return;
+      var nd = Math.max(step, dur + (act === 'plus' ? step : -step));
+      if (tr.end) tr.end += (nd - dur) * 1000;
+      tr.dur = nd;
+    }
+    save(); paintTimers();
+  }
+
+  function clamp(v, lo, hi, def) {
+    v = +v;
+    if (!isFinite(v) || v <= 0) return def;
+    return Math.min(hi, Math.max(lo, v));
+  }
+
+  // Proporcje z przepisu: biga 60% mąki, woda biga 45%, drożdże 0,2% całej mąki, sól 2,6%.
+  function calc(n, w, h) {
+    var hh = h / 100;
+    var F = Math.round(n * w / (1 + hh + 0.026 + 0.002) / 5) * 5;
+    var bf = Math.round(F * 0.6);
+    var bw = Math.round(bf * 0.45);
+    var ff = F - bf;
+    var tw = Math.round(F * hh);
+    var fw = tw - bw;
+    var salt = F * 0.026;
+    var y = F * 0.002;
+    var dough = F + tw + salt + y;
+    return {
+      F: F, bf: bf, bw: bw, ff: ff, tw: tw, fw: fw, salt: salt, y: y,
+      dough: dough, per: dough / n, sem: Math.max(5, Math.round(n * 10 / 5) * 5)
+    };
+  }
+
+  var dayFmt = new Intl.DateTimeFormat('pl-PL', { weekday: 'long', day: 'numeric', month: 'long' });
+  var wdFmt = new Intl.DateTimeFormat('pl-PL', { weekday: 'short' });
+  function hm(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+  function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  function short(d) { return wdFmt.format(d) + ' ' + hm(d); }
+
+  function row(name, val, unit, d) {
+    return '<div class="row"><dt>' + name + '</dt><dd>' + fmt(val, d || 0) + '<small>' + unit + '</small></dd></div>';
+  }
+
+  var lastText = '', lastEv = [];
+
+  function render() {
+    var n = Math.round(clamp(state.n, 1, 60, 6));
+    var w = clamp(state.w, 40, 600, 280);
+    var h = clamp(state.h, 55, 75, 65);
+    var c = calc(n, w, h);
+    var mini = w <= 120;
+
+    // chipy
+    var chips = document.querySelectorAll('.chip');
+    for (var i = 0; i < chips.length; i++) {
+      var ch = chips[i];
+      var on = +ch.dataset.n === n && +ch.dataset.w === w && +ch.dataset.h === h;
+      ch.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+
+    // uwagi
+    var notes = [];
+    if (h !== 65) notes.push('Przetestowane jest tylko 65%. Zmieniona hydracja to nowy eksperyment, a Caputo Pizzeria ma swoją granicę przy 65 do 68%.');
+    if (mini) notes.push('Małe kule rosną szybciej. Wyrastanie 45 do 60 minut, mini pizza piecze się 40 do 60 sekund.');
+    if (n > 8) notes.push('Enzo piecze jedną pizzę naraz, więc ostatnie kule będą czekać długo. Odłóż część do lodówki i wyjmuj partiami co 20 do 25 minut.');
+    $('notices').innerHTML = notes.map(function (t) { return '<p class="warn">' + t + '</p>'; }).join('');
+
+    // składniki
+    $('stages').innerHTML =
+      '<div class="stage"><h3>Biga <span>20 h w lodówce</span></h3><dl>' +
+        row('Mąka Caputo Pizzeria 00', c.bf, 'g') +
+        row('Woda z lodówki', c.bw, 'ml') +
+        row('Drożdże suche Caputo', c.y, 'g', 1) +
+      '</dl></div>' +
+      '<div class="stage"><h3>Ciasto końcowe <span>w mikserze</span></h3><dl>' +
+        row('Mąka Caputo Pizzeria 00', c.ff, 'g') +
+        row('Woda zimna', c.fw, 'ml') +
+        row('Sól drobna', c.salt, 'g', 1) +
+      '</dl></div>';
+
+    $('split').innerHTML = '<i style="width:60%"></i><i style="width:40%"></i>';
+    $('split-l').innerHTML = '<span>Biga ' + fmt(c.bf) + ' g mąki</span><span>Ciasto ' + fmt(c.ff) + ' g mąki</span>';
+
+    function tot(l, v) { return '<div><dt>' + l + '</dt><dd>' + v + '</dd></div>'; }
+    $('totals').innerHTML =
+      tot('Mąka razem', fmt(c.F) + ' g') +
+      tot('Woda razem', fmt(c.tw) + ' ml') +
+      tot('Ciasto razem', fmt(c.dough) + ' g') +
+      tot('Kule', n + ' × ' + fmt(c.per) + ' g');
+
+    lastText =
+      'Biga 60:40, ' + n + ' kul po ok. ' + fmt(c.per) + ' g, hydracja ' + fmt(h, 1) + '%\n\n' +
+      'Biga\n  mąka Caputo Pizzeria 00: ' + fmt(c.bf) + ' g\n  woda z lodówki: ' + fmt(c.bw) + ' ml\n  drożdże suche: ' + fmt(c.y, 1) + ' g\n\n' +
+      'Ciasto końcowe\n  mąka: ' + fmt(c.ff) + ' g\n  woda zimna: ' + fmt(c.fw) + ' ml\n  sól: ' + fmt(c.salt, 1) + ' g';
+
+    // harmonogram
+    var T = new Date(state.bake);
+    var plan = $('plan');
+    var stepTimes = null;
+    if (isNaN(T.getTime())) {
+      lastEv = [];
+      plan.innerHTML = '<p class="warn">Podaj datę i godzinę wypieku.</p>';
+    } else {
+      var proofMin = mini ? 55 : 75;
+      var proofTxt = mini ? '45 do 60' : '60 do 90';
+      function at(min) { return new Date(T.getTime() - min * 60000); }
+      var t = {
+        biga: at(proofMin + 40 + 15 + 1200),
+        mix: at(proofMin + 40 + 15),
+        rest: at(proofMin + 40),
+        divide: at(proofMin),
+        pre: at(35),
+        bake: T
+      };
+      stepTimes = t;
+      var ev = [
+        { t: t.biga, title: 'Mieszasz bigę', d: 'Około 10 minut, potem od razu do lodówki na 20 godzin.' },
+        { t: t.mix, title: 'Ciasto końcowe', d: 'Wyjmij bigę, sprawdź ją i miksuj około 15 minut.' },
+        { t: t.rest, title: 'Odpoczynek ciasta', d: '30 do 45 minut pod przykryciem.' },
+        { t: t.divide, title: 'Dzielenie na kule', d: 'Potem wyrastanie ' + proofTxt + ' minut w temperaturze pokojowej.' },
+        { t: t.pre, title: 'Rozgrzej Enzo', d: '30 minut na maksymalnej temperaturze.' },
+        { t: t.bake, title: 'Pierwsza pizza', d: 'Pieczenie ' + (mini ? '40 do 60' : '60 do 90') + ' sekund, obrót co 10 do 15 sekund.', bake: true }
+      ];
+      lastEv = ev;
+      var html = '', day = '', open = false;
+      ev.forEach(function (e) {
+        var dk = e.t.toDateString();
+        if (dk !== day) {
+          if (open) html += '</ol>';
+          html += '<h3 class="day">' + cap(dayFmt.format(e.t)) + '</h3><ol class="timeline">';
+          open = true; day = dk;
+        }
+        html += '<li' + (e.bake ? ' class="bake"' : '') + '><time datetime="' + toInput(e.t) + '">' + hm(e.t) + '</time><strong>' + e.title + '</strong><span class="d">' + e.d + '</span></li>';
+      });
+      if (open) html += '</ol>';
+      if (t.biga < new Date()) html = '<p class="warn">Start biga wypada w przeszłości. Ustaw późniejszą godzinę wypieku.</p>' + html;
+      plan.innerHTML = html;
+    }
+
+    // kroki
+    function W(t) { return stepTimes ? '<span class="when">' + short(t) + '</span>' : ''; }
+    var tt = stepTimes || {};
+    var rim = mini ? 'około 1 cm' : '1,5 do 2 cm';
+    var steps = [
+      { ph: 'Biga', items: [
+        { id: 's1', t: tt.biga, x: 'Wymieszaj bigę: <b>' + fmt(c.bf) + ' g</b> mąki i <b>' + fmt(c.y, 1) + ' g</b> drożdży, dolej <b>' + fmt(c.bw) + ' ml</b> zimnej wody. Mieszaj ręką tylko do połączenia. Ma wyglądać nierówno i grudkowato, bez wyrabiania.' },
+        { id: 's2', t: tt.biga, tm: [72000, 1800], x: 'Przykryj tak, żeby wierzch nie wysechł (folia dotykająca powierzchni albo pokrywka) i wstaw do lodówki na 20 godzin. Przy 5 °C zamiast 4 °C czas zostaje bez zmian.' },
+        { id: 's3', t: tt.mix, x: 'Wyjmij bigę i sprawdź ją. Zapach lekko drożdżowy, bez ostrego alkoholu. Oderwany kawałek z głębi ciągnie się i ma drobne pęcherzyki. Wzrostu objętości nie szukaj, przy 45% hydracji go nie będzie.' }
+      ]},
+      { ph: 'Ciasto końcowe', items: [
+        { id: 's4', t: tt.mix, tm: [240, 60], x: 'Włóż bigę prosto z lodówki do miksera i rozdrobnij. Dodaj <b>' + fmt(c.ff) + ' g</b> mąki i <b>' + fmt(c.fw) + ' ml</b> zimnej wody. Hak, niskie obroty, 3 do 4 minut.' },
+        { id: 's5', t: tt.mix, tm: [600, 60], x: 'Dodaj <b>' + fmt(c.salt, 1) + ' g</b> soli i miksuj na średnio-niskich obrotach 8 do 10 minut, aż ciasto jest gładkie, elastyczne i odchodzi od ścianek. Gdy powierzchnia jest jeszcze szorstka, daj 2 do 3 minut więcej i zrób test rozciągania. Temperatura ciasta 23 do 25 °C.' },
+        { id: 's6', t: tt.rest, tm: [2400, 300], x: 'Odpoczynek: kula pod przykryciem, 30 do 45 minut w temperaturze pokojowej. W cieplej kuchni zwykle wystarcza 30.' },
+        { id: 's7', t: tt.divide, x: 'Podziel na <b>' + n + ' kul po ok. ' + fmt(c.per) + ' g</b> i uformuj każdą ciasno i gładko. Układaj je pod przykryciem.' },
+        { id: 's8', t: tt.divide, tm: [(mini ? 3300 : 4500), 300], x: 'Wyrastanie ' + (mini ? '45 do 60' : '60 do 90') + ' minut. Test palcem: wgłębienie wraca powoli i zostaje lekki ślad. Gdy kule jeszcze się opierają, daj im do 10 minut więcej.' }
+      ]},
+      { ph: 'Wypiek', items: [
+        { id: 's9', t: tt.pre, tm: [1800, 300], x: 'Rozgrzej Enzo na maksimum (400 do 430 °C) przez pełne 30 minut.' },
+        { id: 's10', t: tt.bake, tm: [(mini ? 50 : 75), 5], x: 'Rozciągaj od środka, brzeg ' + rim + ' zostaw nietknięty. Mało dodatków. Piecz ' + (mini ? '40 do 60' : '60 do 90') + ' sekund, obracaj co 10 do 15 sekund.' }
+      ]}
+    ];
+    $('steps').innerHTML = steps.map(function (p) {
+      return '<div class="phase"><h3>' + p.ph + '</h3><ol class="steps">' + p.items.map(function (it) {
+        return '<li><label class="step"><input type="checkbox" data-id="' + it.id + '"' + (done[it.id] ? ' checked' : '') + '><span class="txt">' + (it.t ? W(it.t) : '') + it.x + '</span></label>' + timerHTML(it) + '</li>';
+      }).join('') + '</ol></div>';
+    }).join('');
+    paintTimers();
+  }
+
+  function update() { save(); render(); }
+
+  $('n').addEventListener('input', function () { state.n = this.value; update(); });
+  $('w').addEventListener('input', function () { state.w = this.value; update(); });
+  $('h').addEventListener('input', function () { state.h = this.value; update(); });
+  $('bake').addEventListener('input', function () { if (this.value) { state.bake = this.value; update(); } });
+  $('n-minus').addEventListener('click', function () { state.n = Math.max(1, Math.round(clamp(state.n, 1, 60, 6)) - 1); $('n').value = state.n; update(); });
+  $('n-plus').addEventListener('click', function () { state.n = Math.min(60, Math.round(clamp(state.n, 1, 60, 6)) + 1); $('n').value = state.n; update(); });
+  $('steps').addEventListener('change', function (e) {
+    var id = e.target && e.target.dataset && e.target.dataset.id;
+    if (!id) return;
+    if (e.target.checked) done[id] = 1; else delete done[id];
+    save();
+  });
+  $('steps').addEventListener('click', function (e) {
+    var b = e.target.closest('.tb');
+    if (b) timerAct(b);
+  });
+  document.addEventListener('pointerdown', initAudio, { once: true });
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) paintTimers(); });
+  setInterval(paintTimers, 1000);
+  function icsDate(d) { return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + 'T' + pad(d.getHours()) + pad(d.getMinutes()) + '00'; }
+  function icsEsc(t) { return String(t).replace(/\\/g, '\\\\').replace(/;/g, '\;').replace(/,/g, '\\,').replace(/\n/g, '\\n'); }
+  $('ics').addEventListener('click', function () {
+    var msg = $('ics-msg');
+    if (!lastEv.length) { msg.textContent = 'Najpierw ustaw godzinę wypieku.'; return; }
+    var stamp = icsDate(new Date());
+    var L = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Biga 60:40//PL', 'CALSCALE:GREGORIAN'];
+    lastEv.forEach(function (e, i) {
+      L.push('BEGIN:VEVENT', 'UID:biga-' + icsDate(e.t) + '-' + i + '@biga-60-40', 'DTSTAMP:' + stamp,
+        'DTSTART:' + icsDate(e.t), 'DTEND:' + icsDate(new Date(e.t.getTime() + 15 * 60000)),
+        'SUMMARY:' + icsEsc('Pizza: ' + e.title), 'DESCRIPTION:' + icsEsc(e.d),
+        'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + icsEsc(e.title), 'TRIGGER:PT0S', 'END:VALARM', 'END:VEVENT');
+    });
+    L.push('END:VCALENDAR');
+    try {
+      var blob = new Blob([L.join('\r\n') + '\r\n'], { type: 'text/calendar' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'biga-60-40-alarmy.ics';
+      document.body.appendChild(a); a.click(); a.remove();
+      msg.textContent = 'Plik pobrany, otwórz go w Kalendarzu.';
+    } catch (err) { msg.textContent = 'Nie udało się pobrać pliku.'; }
+  });
+  $('reset').addEventListener('click', function () { done = {}; update(); });
+  $('copy').addEventListener('click', function () {
+    var msg = $('copy-msg'), box = $('copybox');
+    function fallback() {
+      box.hidden = false; box.value = lastText; box.focus(); box.select();
+      msg.textContent = 'Zaznaczone, skopiuj ręcznie.';
+    }
+    try {
+      navigator.clipboard.writeText(lastText).then(function () {
+        box.hidden = true; msg.textContent = 'Skopiowano.';
+      }, fallback);
+    } catch (e) { fallback(); }
+  });
+
+  $('n').value = state.n; $('w').value = state.w; $('h').value = state.h; $('bake').value = state.bake;
+  render();
+})();
+</script>
+</body>
+</html>
